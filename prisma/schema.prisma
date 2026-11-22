@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  ASSOCIATION
+}
+
+enum ProjectStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+  LATE
+}
+
+enum PaymentStatus {
+  DUE
+  PAID
+}
+
+enum OrphanStatus {
+  WAITING
+  SPONSORED
+  ENDED
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  passwordHash  String
+  role          Role         @default(STAFF)
+  association   Association? @relation(fields: [associationId], references: [id], onDelete: SetNull)
+  associationId String?
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  logs          AuditLog[]
+}
+
+model Association {
+  id        String     @id @default(cuid())
+  name      String     @unique
+  category  String?
+  country   String?
+  phone     String?
+  email     String?
+  logoUrl   String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  projects  Project[]
+  users     User[]
+  donations Donation[]
+  orphans   Orphan[]
+}
+
+model Project {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  name          String
+  country       String
+  sector        String
+  cost          Decimal       @db.Decimal(14, 2)
+  beneficiaries Int?
+  year          Int
+  status        ProjectStatus @default(IN_PROGRESS)
+  description   String?
+  goals         String?
+  startDate     DateTime?
+  endDate       DateTime?
+  association   Association   @relation(fields: [associationId], references: [id], onDelete: Restrict)
+  associationId String
+  createdAt     DateTime      @default(now())
+  phases        Phase[]
+  donations     Donation[]
+  payments      Payment[]
+  reports       Report[]
+}
+
+model Phase {
+  id        String    @id @default(cuid())
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  title     String
+  dueDate   DateTime?
+  done      Boolean   @default(false)
+  sort      Int       @default(0)
+}
+
+model Donation {
+  id            String       @id @default(cuid())
+  donorName     String
+  amount        Decimal      @db.Decimal(14, 2)
+  date          DateTime
+  method        String?
+  reference     String?
+  notes         String?
+  project       Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  projectId     String?
+  association   Association? @relation(fields: [associationId], references: [id], onDelete: SetNull)
+  associationId String?
+  createdAt     DateTime     @default(now())
+}
+
+/// Disbursement installments paid to the implementing association for a project
+model Payment {
+  id        String        @id @default(cuid())
+  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  title     String
+  amount    Decimal       @db.Decimal(14, 2)
+  dueDate   DateTime
+  paidDate  DateTime?
+  status    PaymentStatus @default(DUE)
+  notes     String?
+}
+
+model Sponsor {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  notes     String?
+  createdAt DateTime @default(now())
+  orphans   Orphan[]
+}
+
+model Orphan {
+  id             String               @id @default(cuid())
+  code           String               @unique
+  name           String
+  gender         String?
+  birthDate      DateTime?
+  country        String
+  guardian       String?
+  monthlyAmount  Decimal              @db.Decimal(10, 2)
+  status         OrphanStatus         @default(WAITING)
+  notes          String?
+  association    Association          @relation(fields: [associationId], references: [id], onDelete: Restrict)
+  associationId  String
+  sponsor        Sponsor?             @relation(fields: [sponsorId], references: [id], onDelete: SetNull)
+  sponsorId      String?
+  createdAt      DateTime             @default(now())
+  payments       SponsorshipPayment[]
+}
+
+model SponsorshipPayment {
+  id       String   @id @default(cuid())
+  orphan   Orphan   @relation(fields: [orphanId], references: [id], onDelete: Cascade)
+  orphanId String
+  month    String // YYYY-MM
+  amount   Decimal  @db.Decimal(10, 2)
+  paidAt   DateTime @default(now())
+
+  @@unique([orphanId, month])
+}
+
+model Report {
+  id         String        @id @default(cuid())
+  project    Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  String
+  title      String
+  summary    String?
+  results    String?
+  notes      String?
+  published  Boolean       @default(false)
+  createdBy  String?
+  createdAt  DateTime      @default(now())
+  images     ReportImage[]
+}
+
+model ReportImage {
+  id       String @id @default(cuid())
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId String
+  url      String
+  caption  String?
+}
+
+model Setting {
+  key   String @id
+  value String
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId    String?
+  action    String
+  entity    String
+  entityId  String?
+  summary   String?
+  createdAt DateTime @default(now())
+}
