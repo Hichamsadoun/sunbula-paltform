@@ -187,3 +187,22 @@ textarea { min-height: 96px; resize: vertical; }
   .bar-row { grid-template-columns: 90px 1fr 90px; }
   .hero h1 { font-size: 34px; }
 }
+
+/* public home (original design, inline styles) */
+.home a { color: inherit; }
+html { scroll-behavior: smooth; }
+@media (max-width: 1100px) {
+  .home header { padding: 14px 16px !important; }
+  .home header nav { display: none !important; }
+  .home section, .home footer { margin-left: 16px !important; margin-right: 16px !important; padding-left: 20px !important; padding-right: 20px !important; }
+  .home section[id] { margin-left: 0 !important; margin-right: 0 !important; }
+  .home [style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+  .home [style*="grid-row"], .home [style*="grid-column"] { grid-row: auto !important; grid-column: auto !important; }
+  .home [style*="grid-template-rows"] { grid-template-rows: none !important; }
+  .home h1 { font-size: 42px !important; }
+  .home h2 { font-size: 32px !important; }
+  .home p { font-size: 17px !important; }
+  .home [style*="justify-content: space-between"] { flex-wrap: wrap; gap: 16px; }
+  .home [style*="display: flex; gap: 40px"] { flex-wrap: wrap; gap: 20px !important; }
+  .home [style*="gap: 80px"] { gap: 32px !important; flex-wrap: wrap; }
+}

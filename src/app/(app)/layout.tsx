@@ -40,6 +40,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           {
             title: 'الإدارة',
             items: [
+              { href: '/site', label: 'الصفحة الرئيسية للموقع' },
               { href: '/users', label: 'المستخدمون' },
               { href: '/settings', label: 'الإعدادات' },
               { href: '/activity', label: 'سجل النشاط' },

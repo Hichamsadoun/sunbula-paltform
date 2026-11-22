@@ -3,9 +3,6 @@ import { db } from './db';
 export const SETTING_KEYS = {
   orgName: 'orgName',
   target: (year: number) => `target:${year}`,
-  heroTitle: 'heroTitle',
-  heroText: 'heroText',
-  publicStats: 'publicStats',
 };
 
 export async function getSettings(): Promise<Record<string, string>> {

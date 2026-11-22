@@ -5,7 +5,7 @@ const PUBLIC = ['/', '/login', '/setup'];
 /** Cheap gate: bounce visitors without a session cookie to /login. Real checks run in each page/action. */
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (PUBLIC.includes(pathname) || pathname.startsWith('/_next') || pathname === '/favicon.ico') {
+  if (PUBLIC.includes(pathname) || pathname.startsWith('/p/') || pathname.startsWith('/uploads/') || pathname.startsWith('/_next') || pathname === '/favicon.ico' || pathname === '/president.jpg') {
     return NextResponse.next();
   }
   if (!req.cookies.get('sunbula_session')) {
