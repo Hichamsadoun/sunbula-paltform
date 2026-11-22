@@ -1,8 +1,8 @@
 import 'server-only';
-import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
 import { db } from './db';
+import { putFile } from './storage';
 import type { SessionUser } from './auth';
 
 export const str = (f: FormData, k: string) => {
@@ -23,21 +23,17 @@ export const date = (f: FormData, k: string) => {
 };
 export const bool = (f: FormData, k: string) => f.get(k) === 'on' || f.get(k) === 'true';
 
-export const uploadDir = () => process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads');
-
 const ALLOWED = new Set(['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']);
 
-/** Saves uploaded images under public/uploads and returns their public URLs. */
+/** Saves uploaded images and returns their URLs (served by /uploads/[name]). */
 export async function saveImages(files: FormDataEntryValue[]): Promise<string[]> {
-  const dir = uploadDir();
-  await mkdir(dir, { recursive: true });
   const urls: string[] = [];
   for (const f of files) {
     if (!(f instanceof File) || f.size === 0) continue;
     const ext = path.extname(f.name).toLowerCase();
     if (!ALLOWED.has(ext) || !f.type.startsWith('image/')) continue;
     const name = `${randomUUID()}${ext}`;
-    await writeFile(path.join(dir, name), Buffer.from(await f.arrayBuffer()));
+    await putFile(name, await f.arrayBuffer(), f.type);
     urls.push(`/uploads/${name}`);
   }
   return urls;

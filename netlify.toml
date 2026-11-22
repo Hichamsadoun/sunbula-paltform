@@ -1,0 +1,7 @@
+# Works with Netlify DB (Neon) — it sets NETLIFY_DATABASE_URL — or with your own DATABASE_URL.
+[build]
+  command = "export DATABASE_URL=${DATABASE_URL:-$NETLIFY_DATABASE_URL_UNPOOLED} && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npx next build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
