@@ -1,6 +1,7 @@
-# Works with Netlify DB (Neon) — it sets NETLIFY_DATABASE_URL — or with your own DATABASE_URL.
+# Works with Netlify Database (NETLIFY_DB_URL), the older Neon extension, or your own DATABASE_URL.
+# Prisma keeps its own migrations in prisma/migrations and applies them during the build.
 [build]
-  command = "export DATABASE_URL=${DATABASE_URL:-$NETLIFY_DATABASE_URL_UNPOOLED} && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npx next build"
+  command = "export DATABASE_URL=${DATABASE_URL:-${NETLIFY_DB_URL:-$NETLIFY_DATABASE_URL_UNPOOLED}} && npx prisma generate && npx prisma migrate deploy && npx prisma db seed && npx next build"
   publish = ".next"
 
 [build.environment]

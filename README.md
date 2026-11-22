@@ -21,7 +21,7 @@
 ## النشر على Netlify
 
 1. في Netlify: **Add new project ← Import an existing project ← GitHub ← sunbula-paltform**. الإعدادات تُقرأ من `netlify.toml`.
-2. قبل أول نشر، من **Extensions** فعّل **Neon** (Netlify DB) واربطه بالمشروع، أو ضع `DATABASE_URL` لقاعدة PostgreSQL خاصة بك.
+2. قبل أول نشر، من **Data & Storage ← Database** اختر **Create a database**. أو ضع `DATABASE_URL` لقاعدة PostgreSQL خاصة بك.
 3. في **Project configuration ← Environment variables** أضف: `AUTH_SECRET` و `ADMIN_EMAIL` و `ADMIN_PASSWORD`.
 4. **Deploys ← Trigger deploy**. الصور تُحفظ تلقائياً في Netlify Blobs.
 
