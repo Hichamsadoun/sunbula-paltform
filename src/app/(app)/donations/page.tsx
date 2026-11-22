@@ -49,7 +49,7 @@ export default async function DonationsPage({ searchParams }: { searchParams: Pr
       <div className="table-wrap">
         {list.length === 0 ? <Empty>لا توجد تبرعات.</Empty> : (
           <table>
-            <thead><tr><th>التاريخ</th><th>المتبرع</th><th>المشروع</th><th>الجمعية</th><th>الطريقة</th><th>المرجع</th><th className="num">المبلغ</th></tr></thead>
+            <thead><tr><th>التاريخ</th><th>المتبرع</th><th>المشروع</th><th>الجمعية</th><th>الطريقة</th><th>المرجع / الشيك</th><th className="num">المبلغ</th></tr></thead>
             <tbody>
               {list.map((d) => (
                 <tr key={d.id}>
@@ -58,7 +58,11 @@ export default async function DonationsPage({ searchParams }: { searchParams: Pr
                   <td>{d.project ? <Link href={`/projects/${d.project.id}`}>{d.project.code} · {d.project.name}</Link> : 'تبرع عام'}</td>
                   <td>{d.association?.name ?? '—'}</td>
                   <td>{d.method ?? '—'}</td>
-                  <td className="code">{d.reference ?? ''}</td>
+                  <td>
+                    <span className="code">{d.checkNumber ? `#${d.checkNumber}` : d.reference ?? ''}</span>
+                    {d.checkDate && <small style={{ display: 'block', color: 'var(--muted)' }}>{fdate(d.checkDate)}</small>}
+                    {d.checkImage && <a className="link" href={d.checkImage} target="_blank" style={{ fontSize: 12 }}>صورة الشيك</a>}
+                  </td>
                   <td className="num">{qar(d.amount)}</td>
                 </tr>
               ))}

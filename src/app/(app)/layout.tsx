@@ -16,6 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     {
       items: [
         { href: '/dashboard', label: 'لوحة المؤشرات' },
+        ...(staff ? [{ href: '/plan', label: 'خطة المشاريع' }] : []),
         { href: '/projects', label: 'المشاريع' },
         ...(staff ? [{ href: '/associations', label: 'الجمعيات' }] : []),
       ],

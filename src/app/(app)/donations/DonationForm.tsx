@@ -54,6 +54,20 @@ export function DonationForm({
           <input id="reference" name="reference" dir="ltr" defaultValue={d?.reference ?? ''} />
         </Field>
         <div />
+        <h3 className="full" style={{ margin: '6px 0 0', fontSize: 16 }}>بيانات الشيك (إن وُجد)</h3>
+        <Field label="رقم الشيك" name="checkNumber">
+          <input id="checkNumber" name="checkNumber" dir="ltr" defaultValue={d?.checkNumber ?? ''} />
+        </Field>
+        <Field label="تاريخ إصدار الشيك" name="checkDate">
+          <input id="checkDate" name="checkDate" type="date" defaultValue={inputDate(d?.checkDate)} />
+        </Field>
+        <Field label="البنك" name="bankName">
+          <input id="bankName" name="bankName" defaultValue={d?.bankName ?? ''} />
+        </Field>
+        <Field label="صورة الشيك" name="checkImage" hint={d?.checkImage ? 'اترك الحقل فارغاً للإبقاء على الصورة الحالية.' : undefined}>
+          {d?.checkImage && <a href={d.checkImage} target="_blank"><img src={d.checkImage} alt="صورة الشيك" style={{ maxWidth: 220, maxHeight: 120, borderRadius: 10, border: '1px solid var(--line)', marginBottom: 6 }} /></a>}
+          <input id="checkImage" name="checkImage" type="file" accept="image/*" />
+        </Field>
         <Field label="ملاحظات" name="notes" full>
           <textarea id="notes" name="notes" defaultValue={d?.notes ?? ''} />
         </Field>

@@ -55,10 +55,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
       name: 'التبرعات',
       columns: [
         { header: 'التاريخ', key: 'date', width: 12 }, { header: 'المتبرع', key: 'donor', width: 26 }, { header: 'المشروع', key: 'project', width: 30 },
-        { header: 'الجمعية', key: 'assoc', width: 22 }, { header: 'الطريقة', key: 'method', width: 14 }, { header: 'المرجع', key: 'ref', width: 16 },
+        { header: 'الجمعية', key: 'assoc', width: 22 }, { header: 'الطريقة', key: 'method', width: 14 }, { header: 'المرجع', key: 'ref', width: 16 }, { header: 'رقم الشيك', key: 'chk', width: 14 }, { header: 'تاريخ الشيك', key: 'chkDate', width: 12 }, { header: 'البنك', key: 'bank', width: 16 },
         { header: 'المبلغ (ر.ق)', key: 'amount', width: 16 },
       ],
-      rows: list.map((d) => ({ date: fdate(d.date), donor: d.donorName, project: d.project ? `${d.project.code} ${d.project.name}` : 'تبرع عام', assoc: d.association?.name, method: d.method, ref: d.reference, amount: toNum(d.amount) })),
+      rows: list.map((d) => ({ date: fdate(d.date), donor: d.donorName, project: d.project ? `${d.project.code} ${d.project.name}` : 'تبرع عام', assoc: d.association?.name, method: d.method, ref: d.reference, chk: d.checkNumber, chkDate: d.checkDate ? fdate(d.checkDate) : '', bank: d.bankName, amount: toNum(d.amount) })),
     };
   } else if (entity === 'payments') {
     const list = await db.payment.findMany({
@@ -71,9 +71,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ entity: 
       columns: [
         { header: 'الدفعة', key: 'title', width: 24 }, { header: 'المشروع', key: 'project', width: 30 }, { header: 'الجمعية', key: 'assoc', width: 22 },
         { header: 'الاستحقاق', key: 'due', width: 12 }, { header: 'الصرف', key: 'paid', width: 12 }, { header: 'الحالة', key: 'status', width: 10 },
+        { header: 'رقم الشيك', key: 'chk', width: 14 }, { header: 'تاريخ الشيك', key: 'chkDate', width: 12 }, { header: 'البنك', key: 'bank', width: 16 },
         { header: 'المبلغ (ر.ق)', key: 'amount', width: 16 },
       ],
-      rows: list.map((p) => ({ title: p.title, project: `${p.project.code} ${p.project.name}`, assoc: p.project.association.name, due: fdate(p.dueDate), paid: p.paidDate ? fdate(p.paidDate) : '', status: PAYMENT_STATUS[p.status], amount: toNum(p.amount) })),
+      rows: list.map((p) => ({ title: p.title, project: `${p.project.code} ${p.project.name}`, assoc: p.project.association.name, due: fdate(p.dueDate), paid: p.paidDate ? fdate(p.paidDate) : '', status: PAYMENT_STATUS[p.status], chk: p.checkNumber, chkDate: p.checkDate ? fdate(p.checkDate) : '', bank: p.bankName, amount: toNum(p.amount) })),
     };
   } else if (entity === 'orphans') {
     const list = await db.orphan.findMany({ where: scope(u), orderBy: { code: 'asc' }, include: { association: true, sponsor: true } });

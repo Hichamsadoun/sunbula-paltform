@@ -70,3 +70,13 @@ export async function deletePhase(id: string) {
   const ph = await db.phase.delete({ where: { id } });
   revalidatePath(`/projects/${ph.projectId}`);
 }
+
+/** Opens a planned project so payments can be scheduled against it. */
+export async function openProject(id: string) {
+  const u = await requireStaff();
+  const cur = await db.project.findUniqueOrThrow({ where: { id }, select: { startDate: true } });
+  const p = await db.project.update({ where: { id }, data: { status: 'IN_PROGRESS', startDate: cur.startDate ?? new Date() } });
+  await audit(u, 'فتح', 'مشروع', id, `${p.code} ${p.name}`);
+  revalidatePath(`/projects/${id}`);
+  revalidatePath('/plan');
+}

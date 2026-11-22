@@ -13,7 +13,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const yStart = new Date(`${year}-01-01`);
   const yEnd = new Date(`${year + 1}-01-01`);
 
-  const [projects, donations, payments, orphans, settings] = await Promise.all([
+  const [projects, donations, payments, orphans, settings, allPayments, planTargets] = await Promise.all([
     db.project.findMany({ where: scope(u), include: { association: { select: { name: true } } } }),
     staff ? db.donation.findMany({ orderBy: { date: 'desc' }, include: { project: { select: { code: true } } } }) : Promise.resolve([]),
     db.payment.findMany({
@@ -24,7 +24,19 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
     }),
     db.orphan.findMany({ where: scope(u), select: { status: true } }),
     getSettings(),
+    db.payment.findMany({ where: staff ? {} : { project: { associationId: u.associationId ?? '__none__' } }, select: { amount: true, status: true, dueDate: true } }),
+    staff ? db.planTarget.findMany({ where: { year }, select: { amount: true } }) : Promise.resolve([]),
   ]);
+  const openCost = projects.filter((p) => p.status !== 'PLANNED').reduce((s, p) => s + toNum(p.cost), 0);
+  const paidTotal = allPayments.filter((p) => p.status === 'PAID').reduce((s, p) => s + toNum(p.amount), 0);
+  const now = new Date();
+  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const dueRows = allPayments.filter((p) => p.status === 'DUE');
+  const overdueAmt = dueRows.filter((p) => p.dueDate < now).reduce((s, p) => s + toNum(p.amount), 0);
+  const dueMonthAmt = dueRows.filter((p) => p.dueDate >= now && p.dueDate < monthEnd).reduce((s, p) => s + toNum(p.amount), 0);
+  const donatedAll = donations.reduce((s, d) => s + toNum(d.amount), 0);
+  const planTarget = planTargets.reduce((s, t) => s + toNum(t.amount), 0);
+  const planAlloc = projects.filter((p) => p.year === year).reduce((s, p) => s + toNum(p.cost), 0);
 
   const cost = projects.reduce((s, p) => s + toNum(p.cost), 0);
   const ben = projects.reduce((s, p) => s + (p.beneficiaries ?? 0), 0);
@@ -49,6 +61,7 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
           <h2>ابدأ بإعداد النظام</h2>
           <ol style={{ margin: 0, paddingInlineStart: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
             <li><Link className="link" href="/associations/new">أضف الجمعيات الشريكة</Link></li>
+            <li><Link className="link" href="/plan">حدد خطة المشاريع: المبلغ المستهدف لكل سنة ودولة وقطاع</Link></li>
             <li><Link className="link" href="/projects/new">أضف المشاريع واربطها بالجمعيات</Link></li>
             <li><Link className="link" href="/donations/new">سجّل التبرعات</Link> و<Link className="link" href="/payments/new">الدفعات</Link></li>
             {u.role === 'ADMIN' && <li><Link className="link" href="/settings">حدد المبلغ المستهدف للسنة</Link> و<Link className="link" href="/users">أنشئ حسابات للموظفين والجمعيات</Link></li>}
@@ -61,6 +74,20 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
         <Stat label="المشاريع المنجزة" value={`${done} / ${projects.length}`} accent />
         <Stat label="الدول" value={countries} />
         <Stat label="المستفيدون" value={fmt(ben)} />
+      </div>
+
+      <div className="card">
+        <div className="spread" style={{ marginBottom: 16 }}><h2 style={{ margin: 0 }}>المؤشرات المالية</h2><Link className="link" href="/payments">تفاصيل الدفعات</Link></div>
+        <div className="grid g4">
+          <div className="stat"><span>التزامات المشاريع المفتوحة</span><b style={{ fontSize: 22 }}>{qar(openCost)}</b></div>
+          <div className="stat"><span>المدفوع للجهات المنفذة</span><b className="accent" style={{ fontSize: 22 }}>{qar(paidTotal)}</b><small>{openCost ? Math.round((paidTotal / openCost) * 100) : 0}% من الالتزامات</small></div>
+          <div className="stat"><span>المتبقي على المشاريع</span><b style={{ fontSize: 22 }}>{qar(Math.max(0, openCost - paidTotal))}</b></div>
+          <div className="stat"><span>مستحق هذا الشهر</span><b style={{ fontSize: 22 }}>{qar(dueMonthAmt)}</b>{overdueAmt > 0 && <small style={{ color: 'var(--bad)' }}>متأخر: {qar(overdueAmt)}</small>}</div>
+          {staff && <div className="stat"><span>إجمالي التبرعات</span><b style={{ fontSize: 22 }}>{qar(donatedAll)}</b></div>}
+          {staff && <div className="stat"><span>رصيد التبرعات بعد الصرف</span><b style={{ fontSize: 22, color: donatedAll - paidTotal < 0 ? 'var(--bad)' : undefined }}>{qar(donatedAll - paidTotal)}</b></div>}
+          {staff && <div className="stat"><span>خطة {year}: المستهدف</span><b style={{ fontSize: 22 }}>{planTarget ? qar(planTarget) : <Link className="link" href="/plan" style={{ fontSize: 15 }}>حدد الخطة</Link>}</b></div>}
+          {staff && <div className="stat"><span>خطة {year}: المخصص لمشاريع</span><b style={{ fontSize: 22 }}>{qar(planAlloc)}</b>{planTarget > 0 && <small>{Math.round((planAlloc / planTarget) * 100)}% من المستهدف</small>}</div>}
+        </div>
       </div>
 
       {staff && (

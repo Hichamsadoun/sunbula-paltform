@@ -101,6 +101,10 @@ model Donation {
   date          DateTime
   method        String?
   reference     String?
+  checkNumber   String?
+  checkDate     DateTime?
+  bankName      String?
+  checkImage    String?
   notes         String?
   project       Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
   projectId     String?
@@ -119,6 +123,11 @@ model Payment {
   dueDate   DateTime
   paidDate  DateTime?
   status    PaymentStatus @default(DUE)
+  method      String?
+  checkNumber String?
+  checkDate   DateTime?
+  bankName    String?
+  checkImage  String?
   notes     String?
 }
 
@@ -198,4 +207,17 @@ model AuditLog {
   entityId  String?
   summary   String?
   createdAt DateTime @default(now())
+}
+
+/// Multi-year plan: target amount for a year, country and (optionally) sector
+model PlanTarget {
+  id        String   @id @default(cuid())
+  year      Int
+  country   String
+  sector    String   @default("")
+  amount    Decimal  @db.Decimal(14, 2)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@unique([year, country, sector])
 }

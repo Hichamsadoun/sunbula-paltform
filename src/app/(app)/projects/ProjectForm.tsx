@@ -19,7 +19,7 @@ export function ProjectForm({
   p?: Project;
   associations: { id: string; name: string }[];
   error?: string;
-  defaults?: { associationId?: string; code?: string };
+  defaults?: { associationId?: string; code?: string; status?: string; year?: string };
 }) {
   const action = saveProject.bind(null, p?.id ?? null);
   return (
@@ -41,7 +41,7 @@ export function ProjectForm({
         </select>
       </Field>
       <Field label="الحالة" name="status">
-        <select id="status" name="status" defaultValue={p?.status ?? 'IN_PROGRESS'}>
+        <select id="status" name="status" defaultValue={p?.status ?? defaults?.status ?? 'IN_PROGRESS'}>
           {Object.entries(PROJECT_STATUS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
         </select>
       </Field>
@@ -60,7 +60,7 @@ export function ProjectForm({
         <input id="beneficiaries" name="beneficiaries" type="number" min="0" dir="ltr" defaultValue={p?.beneficiaries ?? ''} />
       </Field>
       <Field label="السنة *" name="year">
-        <input id="year" name="year" type="number" min="2000" max="2100" required dir="ltr" defaultValue={p?.year ?? new Date().getFullYear()} />
+        <input id="year" name="year" type="number" min="2000" max="2100" required dir="ltr" defaultValue={p?.year ?? defaults?.year ?? new Date().getFullYear()} />
       </Field>
       <div />
       <Field label="تاريخ البدء" name="startDate">

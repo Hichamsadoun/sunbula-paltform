@@ -5,7 +5,7 @@ import { isStaff, requireUser, scope } from '@/lib/auth';
 import { PageHead, Stat, Badge, Empty } from '@/components/ui';
 import { ConfirmButton } from '@/components/ConfirmButton';
 import { PAYMENT_STATUS, PROJECT_STATUS, fdate, fmt, qar, toNum } from '@/lib/format';
-import { addPhase, deletePhase, deleteProject, togglePhase } from '../actions';
+import { addPhase, deletePhase, deleteProject, openProject, togglePhase } from '../actions';
 
 export default async function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const u = await requireUser();
@@ -23,6 +23,8 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
   if (!p) notFound();
   const staff = isStaff(u);
   const paid = p.payments.filter((x) => x.status === 'PAID').reduce((s, x) => s + toNum(x.amount), 0);
+  const scheduled = p.payments.reduce((s, x) => s + toNum(x.amount), 0);
+  const isOpen = p.status !== 'PLANNED';
   const donated = p.donations.reduce((s, x) => s + toNum(x.amount), 0);
   const cost = toNum(p.cost);
   const donePhases = p.phases.filter((x) => x.done).length;
@@ -38,11 +40,17 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
         crumbs={[{ href: '/projects', label: 'المشاريع' }]}
       >
         <Link className="btn ghost" href={`/reports/new?projectId=${p.id}`}>+ تقرير</Link>
-        {staff && <Link className="btn ghost" href={`/payments/new?projectId=${p.id}`}>+ دفعة</Link>}
+        {staff && isOpen && <Link className="btn ghost" href={`/payments/new?projectId=${p.id}&from=project`}>+ دفعة</Link>}
+        {staff && !isOpen && (
+          <form action={openProject.bind(null, p.id)}><button className="btn">فتح المشروع</button></form>
+        )}
         {staff && <Link className="btn ghost" href={`/donations/new?projectId=${p.id}`}>+ تبرع</Link>}
         {staff && <Link className="btn" href={`/projects/${p.id}/edit`}>تعديل</Link>}
       </PageHead>
 
+      {!isOpen && (
+        <div className="note">هذا المشروع ضمن الخطة ولم يُفتح بعد. اضغط «فتح المشروع» عند بدء التنفيذ لتتمكن من جدولة الدفعات.</div>
+      )}
       <div className="grid g4">
         <Stat label="التكلفة" value={qar(cost)} />
         <Stat label="التبرعات المسجلة" value={qar(donated)} note={cost ? `${Math.round((donated / cost) * 100)}% من التكلفة` : undefined} accent />
@@ -99,16 +107,28 @@ export default async function ProjectPage({ params }: { params: Promise<{ id: st
 
       <div className="card">
         <h2>الدفعات</h2>
+        <div className="grid g4" style={{ marginBottom: 16 }}>
+          <div className="stat"><span>المجدول</span><b style={{ fontSize: 20 }}>{qar(scheduled)}</b><small>غير مجدول: {qar(Math.max(0, cost - scheduled))}</small></div>
+          <div className="stat"><span>المدفوع</span><b className="accent" style={{ fontSize: 20 }}>{qar(paid)}</b></div>
+          <div className="stat"><span>المتبقي</span><b style={{ fontSize: 20 }}>{qar(Math.max(0, cost - paid))}</b></div>
+          <div className="stat"><span>نسبة الصرف</span><b style={{ fontSize: 20 }}>{cost ? Math.round((paid / cost) * 100) : 0}%</b><div className="progress" style={{ height: 8 }}><div style={{ width: `${cost ? Math.min(100, (paid / cost) * 100) : 0}%` }} /></div></div>
+        </div>
         {p.payments.length === 0 ? <Empty>لا توجد دفعات مجدولة.</Empty> : (
           <table>
-            <thead><tr><th>الدفعة</th><th>تاريخ الاستحقاق</th><th>تاريخ الدفع</th><th>الحالة</th><th className="num">المبلغ</th></tr></thead>
+            <thead><tr><th>الدفعة</th><th>تاريخ الاستحقاق</th><th>تاريخ الدفع</th><th>الشيك</th><th>الحالة</th><th className="num">المبلغ</th><th className="num">المتبقي بعدها</th></tr></thead>
             <tbody>
-              {p.payments.map((x) => (
+              {p.payments.map((x, i) => (
                 <tr key={x.id}>
                   <td>{staff ? <Link className="link" href={`/payments/${x.id}/edit`}>{x.title}</Link> : x.title}</td>
                   <td>{fdate(x.dueDate)}</td><td>{fdate(x.paidDate)}</td>
+                  <td>
+                    {x.checkNumber ? <span className="code">#{x.checkNumber}</span> : '—'}
+                    {x.checkDate && <small style={{ display: 'block', color: 'var(--muted)' }}>{fdate(x.checkDate)}{x.bankName ? ` · ${x.bankName}` : ''}</small>}
+                    {x.checkImage && <a className="link" href={x.checkImage} target="_blank" style={{ fontSize: 12 }}>صورة الشيك</a>}
+                  </td>
                   <td><Badge status={x.status} label={PAYMENT_STATUS[x.status]} /></td>
                   <td className="num">{qar(x.amount)}</td>
+                  <td className="num">{qar(Math.max(0, cost - p.payments.slice(0, i + 1).reduce((s, y) => s + toNum(y.amount), 0)))}</td>
                 </tr>
               ))}
             </tbody>

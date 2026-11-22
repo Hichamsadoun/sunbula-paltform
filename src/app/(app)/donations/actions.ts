@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { requireStaff } from '@/lib/auth';
-import { audit, date, num, opt, str } from '@/lib/forms';
+import { audit, date, num, opt, saveImages, str } from '@/lib/forms';
 
 export async function saveDonation(id: string | null, f: FormData) {
   const u = await requireStaff();
@@ -19,12 +19,16 @@ export async function saveDonation(id: string | null, f: FormData) {
     date: date(f, 'date') ?? new Date(),
     method: opt(f, 'method'),
     reference: opt(f, 'reference'),
+    checkNumber: opt(f, 'checkNumber'),
+    checkDate: date(f, 'checkDate'),
+    bankName: opt(f, 'bankName'),
     notes: opt(f, 'notes'),
     projectId,
     associationId,
   };
   if (!d.donorName || !d.amount || d.amount <= 0) redirect(`${back}?error=required`);
-  const data = { ...d, amount: d.amount };
+  const [checkImage] = await saveImages([f.get('checkImage')].filter(Boolean) as FormDataEntryValue[]);
+  const data = { ...d, amount: d.amount, ...(checkImage ? { checkImage } : {}) };
   const rec = id ? await db.donation.update({ where: { id }, data }) : await db.donation.create({ data });
   await audit(u, id ? 'تعديل' : 'إضافة', 'تبرع', rec.id, `${rec.donorName} ${rec.amount}`);
   revalidatePath('/donations');

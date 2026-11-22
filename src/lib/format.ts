@@ -14,7 +14,7 @@ export const fdate = (d: Date | null | undefined) =>
 export const inputDate = (d: Date | null | undefined) => (d ? d.toISOString().slice(0, 10) : '');
 
 export const PROJECT_STATUS: Record<string, string> = {
-  PLANNED: 'مخطط',
+  PLANNED: 'مستهدف (لم يُفتح)',
   IN_PROGRESS: 'قيد التنفيذ',
   DONE: 'منجز',
   LATE: 'متأخر',
