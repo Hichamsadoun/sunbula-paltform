@@ -3,12 +3,13 @@ import bcrypt from 'bcryptjs';
 
 const db = new PrismaClient();
 
-/** Creates the first admin account only. The system starts with no data. */
+/** Optional: creates the first admin from env vars. Without them, use the /setup page. The system starts with no data. */
 async function main() {
   const email = (process.env.ADMIN_EMAIL || 'admin@sunbula.qa').toLowerCase();
   const password = process.env.ADMIN_PASSWORD;
   if (!password || password === 'change-me') {
-    throw new Error('Set ADMIN_PASSWORD in .env before seeding.');
+    console.log('ADMIN_PASSWORD not set: skipping. Create the admin from /setup on first visit.');
+    return;
   }
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {

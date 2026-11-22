@@ -2,15 +2,29 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SignJWT, jwtVerify } from 'jose';
+import { randomBytes } from 'crypto';
 import { db } from './db';
 import type { Role } from '@prisma/client';
 
 const COOKIE = 'sunbula_session';
-const secret = () => {
-  const s = process.env.AUTH_SECRET;
-  if (!s && process.env.NODE_ENV === 'production') throw new Error('AUTH_SECRET is not set');
-  return new TextEncoder().encode(s || 'dev-secret-change-me');
-};
+let cached: Uint8Array | null = null;
+
+/** Signing key: AUTH_SECRET if set, otherwise a random key generated once and kept in the database. */
+async function secret(): Promise<Uint8Array> {
+  if (cached) return cached;
+  let s = process.env.AUTH_SECRET;
+  if (!s) {
+    const row = await db.setting.findUnique({ where: { key: 'authSecret' } });
+    if (row) s = row.value;
+    else {
+      const fresh = randomBytes(32).toString('hex');
+      await db.setting.upsert({ where: { key: 'authSecret' }, create: { key: 'authSecret', value: fresh }, update: {} });
+      s = (await db.setting.findUniqueOrThrow({ where: { key: 'authSecret' } })).value;
+    }
+  }
+  cached = new TextEncoder().encode(s);
+  return cached;
+}
 
 export type SessionUser = {
   id: string;
@@ -25,7 +39,7 @@ export async function createSession(userId: string) {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(secret());
+    .sign(await secret());
   (await cookies()).set(COOKIE, token, {
     httpOnly: true,
     sameSite: 'lax',
@@ -43,7 +57,7 @@ export async function getUser(): Promise<SessionUser | null> {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret());
+    const { payload } = await jwtVerify(token, await secret());
     const u = await db.user.findUnique({ where: { id: String(payload.sub) } });
     if (!u || !u.active) return null;
     return { id: u.id, name: u.name, email: u.email, role: u.role, associationId: u.associationId };

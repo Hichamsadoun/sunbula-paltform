@@ -4,6 +4,8 @@ import { db } from '@/lib/db';
 import { createSession, getUser } from '@/lib/auth';
 import { Logo } from '@/components/Logo';
 
+export const dynamic = 'force-dynamic';
+
 async function login(formData: FormData) {
   'use server';
   const email = String(formData.get('email') || '').trim().toLowerCase();
@@ -19,6 +21,7 @@ async function login(formData: FormData) {
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (await getUser()) redirect('/dashboard');
+  if ((await db.user.count()) === 0) redirect('/setup');
   const { error } = await searchParams;
   return (
     <div className="auth">

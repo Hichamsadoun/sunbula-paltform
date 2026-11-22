@@ -16,14 +16,14 @@
 | المستخدمون | مدير النظام، وموظف، وحساب جمعية يرى بيانات جمعيته فقط |
 | الإعدادات وسجل النشاط | الهدف السنوي، ونصوص الصفحة العامة، وسجل كل عملية |
 
-يبدأ النظام فارغاً، وفيه فقط حساب مدير النظام.
+يبدأ النظام فارغاً. عند أول زيارة تظهر صفحة `/setup` لإنشاء حساب مدير النظام، وتختفي بعدها.
 
 ## النشر على Netlify
 
 1. في Netlify: **Add new project ← Import an existing project ← GitHub ← sunbula-paltform**. الإعدادات تُقرأ من `netlify.toml`.
 2. قبل أول نشر، من **Data & Storage ← Database** اختر **Create a database**. أو ضع `DATABASE_URL` لقاعدة PostgreSQL خاصة بك.
-3. في **Project configuration ← Environment variables** أضف: `AUTH_SECRET` و `ADMIN_EMAIL` و `ADMIN_PASSWORD`.
-4. **Deploys ← Trigger deploy**. الصور تُحفظ تلقائياً في Netlify Blobs.
+3. **Deploys ← Trigger deploy**. الصور تُحفظ تلقائياً في Netlify Blobs.
+4. افتح الرابط: أول زيارة تفتح صفحة **الإعداد** لإنشاء حساب مدير النظام. لا حاجة لأي متغيرات بيئة.
 
 ## التشغيل بـ Docker
 

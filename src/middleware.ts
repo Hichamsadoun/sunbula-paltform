@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC = ['/', '/login'];
+const PUBLIC = ['/', '/login', '/setup'];
 
 /** Cheap gate: bounce visitors without a session cookie to /login. Real checks run in each page/action. */
 export function middleware(req: NextRequest) {
