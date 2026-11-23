@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Logo } from './Logo';
+import { BrandLogo } from './Logo';
 
 type Item = { href: string; label: string };
 type Section = { title?: string; items: Item[] };
@@ -11,18 +11,20 @@ export function Sidebar({
   user,
   roleLabel,
   logout,
+  logo,
 }: {
   sections: Section[];
   user: { name: string };
   roleLabel: string;
   logout: () => Promise<void>;
+  logo?: string | null;
 }) {
   const path = usePathname();
   const on = (href: string) => (href === '/dashboard' ? path === href : path === href || path.startsWith(href + '/'));
   return (
     <aside className="side">
       <Link href="/dashboard" className="brand">
-        <div className="brand-mark"><Logo /></div>
+        <div className={`brand-mark${logo ? ' has-img' : ''}`}><BrandLogo src={logo} /></div>
         <span className="brand-name kufi">السنبلة</span>
       </Link>
       <nav className="nav">

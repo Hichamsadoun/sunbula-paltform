@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import { db } from '@/lib/db';
 import { createSession, getUser } from '@/lib/auth';
-import { Logo } from '@/components/Logo';
+import { BrandLogo } from '@/components/Logo';
+import { getSiteLogo } from '@/lib/settings';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,11 +24,12 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   if (await getUser()) redirect('/dashboard');
   if ((await db.user.count()) === 0) redirect('/setup');
   const { error } = await searchParams;
+  const logo = await getSiteLogo();
   return (
     <div className="auth">
       <form action={login} className="card">
         <div className="brand" style={{ justifyContent: 'center' }}>
-          <div className="brand-mark"><Logo /></div>
+          <div className={`brand-mark${logo ? ' has-img' : ''}`}><BrandLogo src={logo} /></div>
           <span className="brand-name kufi" style={{ color: 'var(--navy)' }}>السنبلة</span>
         </div>
         <p style={{ textAlign: 'center', margin: 0, color: 'var(--muted)' }}>تسجيل الدخول إلى نظام الإدارة</p>

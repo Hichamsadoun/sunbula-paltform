@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
-import { Logo } from '@/components/Logo';
+import { BrandLogo } from '@/components/Logo';
+import { getSiteLogo } from '@/lib/settings';
 import { Badge } from '@/components/ui';
 import { PROJECT_STATUS, fdate, fmt, qar } from '@/lib/format';
 
@@ -19,13 +20,14 @@ export default async function PublicProject({ params }: { params: Promise<{ id: 
     },
   });
   if (!p || p.status === 'PLANNED') notFound();
+  const logo = await getSiteLogo();
   const progress = p.phases.length ? Math.round((p.phases.filter((x) => x.done).length / p.phases.length) * 100) : p.status === 'DONE' ? 100 : 0;
   return (
     <>
       <header className="pub-nav">
         <div className="in">
           <Link href="/" className="brand">
-            <div className="brand-mark"><Logo /></div>
+            <div className={`brand-mark${logo ? ' has-img' : ''}`}><BrandLogo src={logo} /></div>
             <span className="brand-name kufi" style={{ color: 'var(--navy)' }}>السنبلة</span>
           </Link>
           <Link className="btn ghost" href="/#projects">← كل المشاريع</Link>

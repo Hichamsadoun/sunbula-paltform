@@ -249,3 +249,5 @@ html { scroll-behavior: smooth; }
   .hp *, .hp *::before { animation: none !important; transition: none !important; }
   .hp-js [data-reveal], .hp-js .hp-stagger[data-reveal] > * { opacity: 1 !important; transform: none !important; }
 }
+.hp-mark.has-img { background: #fff; border: 1px solid #E3E8F0; overflow: hidden; }
+.hp-mark .brand-img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }

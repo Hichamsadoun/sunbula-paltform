@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { requireAdmin } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { audit, saveImages, str } from '@/lib/forms';
+import { BrandLogo } from '@/components/Logo';
 import { getSettings, setSetting } from '@/lib/settings';
 import { HOME_DEFAULTS, OVERRIDES } from '@/lib/home';
 import { PageHead, Field } from '@/components/ui';
@@ -30,6 +31,9 @@ async function save(f: FormData) {
   for (const o of OVERRIDES) await setSetting(`home:${o.key}`, str(f, o.key).replace(/,/g, ''));
   const [pres] = await saveImages([f.get('presPhoto')].filter(Boolean) as FormDataEntryValue[]);
   if (pres) await setSetting('home:presPhoto', pres);
+  const [logo] = await saveImages([f.get('logo')].filter(Boolean) as FormDataEntryValue[]);
+  if (logo) await setSetting('home:logo', logo);
+  if (f.get('logoReset')) await setSetting('home:logo', '');
   const [orph] = await saveImages([f.get('orphanPhoto')].filter(Boolean) as FormDataEntryValue[]);
   if (orph) await setSetting('home:orphanPhoto', orph);
   await audit(u, 'تعديل', 'الصفحة الرئيسية');
@@ -71,6 +75,11 @@ export default async function SitePage({ searchParams }: { searchParams: Promise
         </div>
         <div className="card form">
           <h2 className="full" style={{ margin: 0 }}>الصور</h2>
+          <Field label="شعار المنصة (يظهر أعلى الموقع وفي النظام)" name="logo" hint="صورة PNG أو JPG مربعة يفضّل أن تكون بخلفية شفافة.">
+            <span className={`brand-mark${s['home:logo'] ? ' has-img' : ''}`} style={{ marginBottom: 6 }}><BrandLogo src={s['home:logo']} /></span>
+            <input id="logo" name="logo" type="file" accept="image/*" />
+            {s['home:logo'] && <label style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 6, fontWeight: 400 }}><input type="checkbox" name="logoReset" style={{ width: 'auto' }} /> الرجوع إلى شعار السنبلة الافتراضي</label>}
+          </Field>
           <Field label="صورة الرئيس" name="presPhoto" hint="اترك الحقل فارغاً للإبقاء على الصورة الحالية.">
             <img src={s['home:presPhoto'] || '/president.jpg'} alt="" style={{ width: 90, height: 110, objectFit: 'cover', borderRadius: 12, marginBottom: 6 }} />
             <input id="presPhoto" name="presPhoto" type="file" accept="image/*" />

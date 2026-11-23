@@ -13,3 +13,9 @@ export async function getSettings(): Promise<Record<string, string>> {
 export async function setSetting(key: string, value: string) {
   await db.setting.upsert({ where: { key }, create: { key, value }, update: { value } });
 }
+
+/** URL of the uploaded organisation logo, or null to use the built-in mark. */
+export async function getSiteLogo(): Promise<string | null> {
+  const r = await db.setting.findUnique({ where: { key: 'home:logo' } });
+  return r?.value || null;
+}

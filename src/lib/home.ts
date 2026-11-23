@@ -131,6 +131,7 @@ export async function getHomeData(tab: string) {
     orphanRows: orphanRows.map(([name, n]) => ({ name, n, share: Math.round((n / orphans.length) * 100) })),
     orphanMonthly: Number(text('orphanMonthly')) || 0,
     presPhoto: s['home:presPhoto'] || '/president.jpg',
+    logo: s['home:logo'] || null,
     orphanPhoto: s['home:orphanPhoto'] || null,
     tab: current,
     projectsTotal: projects.length,

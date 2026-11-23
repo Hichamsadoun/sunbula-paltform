@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { destroySession, requireUser } from '@/lib/auth';
 import { ROLES } from '@/lib/format';
 import { Sidebar } from '@/components/Sidebar';
+import { getSiteLogo } from '@/lib/settings';
 
 async function logout() {
   'use server';
@@ -52,7 +53,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ];
   return (
     <div className="shell">
-      <Sidebar sections={sections} user={{ name: user.name }} roleLabel={ROLES[user.role]} logout={logout} />
+      <Sidebar sections={sections} user={{ name: user.name }} roleLabel={ROLES[user.role]} logout={logout} logo={await getSiteLogo()} />
       <main className="main">{children}</main>
     </div>
   );

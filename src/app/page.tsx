@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Logo } from '@/components/Logo';
+import { BrandLogo, Logo } from '@/components/Logo';
 import { getHomeData, arCount, PROJECTS_W, COUNTRIES_W, TABS } from '@/lib/home';
 import { FLAGS, ICONS } from '@/lib/home-assets';
 import { fmt } from '@/lib/format';
@@ -53,7 +53,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
       <header className="hp-nav">
         <div className="hx hp-nav-in">
           <a href="#top" className="hp-brand">
-            <span className="hp-mark"><Logo size={28} /></span>
+            <span className={`hp-mark${d.logo ? ' has-img' : ''}`}><BrandLogo src={d.logo} size={28} /></span>
             <span><b className="kufi">{short}</b><small>للتنمية</small></span>
           </a>
           <nav className="hp-links">{NAV.map(([h, l]) => <a key={h} href={h}>{l}</a>)}</nav>

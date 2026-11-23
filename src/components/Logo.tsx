@@ -12,3 +12,8 @@ export function Logo({ size = 30 }: { size?: number }) {
     </svg>
   );
 }
+
+/** The organisation's mark: the uploaded logo (Site settings) when there is one, otherwise the wheat icon. */
+export function BrandLogo({ src, size = 30 }: { src?: string | null; size?: number }) {
+  return src ? <img className="brand-img" src={src} alt="" /> : <Logo size={size} />;
+}
