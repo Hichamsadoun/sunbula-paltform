@@ -51,6 +51,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
   return (
     <div className="hp">
       <header className="hp-nav">
+        <span className="hp-progress" aria-hidden="true" />
         <div className="hx hp-nav-in">
           <a href="#top" className="hp-brand">
             <span className={`hp-mark${d.logo ? ' has-img' : ''}`}><BrandLogo src={d.logo} size={28} /></span>
@@ -89,6 +90,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
         {/* HERO */}
         <section className="hx">
           <div className="hp-hero" data-reveal>
+            <span className="hp-blobs" aria-hidden="true"><i className="b1" /><i className="b2" /><i className="b3" /></span>
+            <span className="hp-grains" aria-hidden="true">{Array.from({ length: 16 }, (_, i) => <i key={i} style={{ ['--i' as string]: i }} />)}</span>
             <span className="hp-hero-deco" aria-hidden="true"><Logo size={220} /></span>
             <div className="hp-hero-text">
               <span className="hp-pill">{short}</span>

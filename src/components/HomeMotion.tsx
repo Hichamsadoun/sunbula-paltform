@@ -40,7 +40,37 @@ export function HomeMotion() {
       { threshold: 0.15, rootMargin: '0px 0px -40px 0px' },
     );
     document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
-    return () => io.disconnect();
+
+    // Scroll progress bar and nav shadow.
+    const nav = document.querySelector<HTMLElement>('.hp-nav');
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const max = document.documentElement.scrollHeight - innerHeight;
+        root.style.setProperty('--hp-p', String(max > 0 ? scrollY / max : 0));
+        nav?.classList.toggle('scrolled', scrollY > 12);
+      });
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    // Hero follows the pointer a little (desktop only).
+    const hero = document.querySelector<HTMLElement>('.hp-hero');
+    const fine = matchMedia('(pointer: fine)').matches;
+    const onMove = (e: PointerEvent) => {
+      if (!hero) return;
+      const r = hero.getBoundingClientRect();
+      hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width - 0.5).toFixed(3));
+      hero.style.setProperty('--my', ((e.clientY - r.top) / r.height - 0.5).toFixed(3));
+    };
+    if (hero && fine && !reduce) hero.addEventListener('pointermove', onMove);
+
+    return () => {
+      io.disconnect();
+      removeEventListener('scroll', onScroll);
+      hero?.removeEventListener('pointermove', onMove);
+    };
   }, []);
   return null;
 }
