@@ -59,7 +59,7 @@ export const TABS = [
 ] as const;
 
 export async function getHomeData(tab: string) {
-  const [s, projects, orphans, partners, planTargets, donations] = await Promise.all([
+  const [s, projects, orphans, associations, planTargets, donations] = await Promise.all([
     getSettings(),
     db.project.findMany({
       orderBy: [{ year: 'desc' }, { createdAt: 'desc' }],
@@ -70,7 +70,7 @@ export async function getHomeData(tab: string) {
       },
     }),
     db.orphan.findMany({ where: { status: 'SPONSORED' }, select: { country: true } }),
-    db.association.count(),
+    db.association.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true, logoUrl: true } }),
     db.planTarget.findMany({ select: { year: true, amount: true } }),
     db.donation.findMany({ select: { date: true, amount: true } }),
   ]);
@@ -107,7 +107,7 @@ export async function getHomeData(tab: string) {
     done: ov('done', projects.filter((p) => p.status === 'DONE').length),
     inProgress: ov('inProgress', projects.filter((p) => p.status === 'IN_PROGRESS' || p.status === 'LATE').length),
     planned: ov('planned', projects.filter((p) => p.status === 'PLANNED').length),
-    partners: ov('partners', partners),
+    partners: ov('partners', associations.length),
     beneficiaries: ov('beneficiaries', projects.reduce((a, p) => a + (p.beneficiaries ?? 0), 0)),
     orphans: ov('orphans', orphans.length),
   };
@@ -119,6 +119,7 @@ export async function getHomeData(tab: string) {
       : '');
 
   return {
+    associations,
     plan,
     year,
     orgName,

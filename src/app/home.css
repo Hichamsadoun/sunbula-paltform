@@ -185,3 +185,67 @@
   .hp-auto.wide { grid-template-columns: 1fr; }
 }
 html { scroll-behavior: smooth; }
+
+/* ---------- partners strip ---------- */
+.hp-partners { background: #fff; border-bottom: 1px solid #DCE0E6; }
+.hp-partners-in { display: flex; align-items: center; gap: 20px; height: 76px; }
+.hp-partners-label { flex-shrink: 0; font-size: 14px; font-weight: 700; color: #1F3A68; padding-inline-end: 20px; border-inline-end: 1px solid #DCE0E6; }
+.hp-marquee { flex: 1; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.hp-marquee-track { display: flex; width: max-content; gap: 44px; animation: hp-marquee linear infinite; }
+.hp-marquee:hover .hp-marquee-track { animation-play-state: paused; }
+@keyframes hp-marquee { from { transform: translateX(0); } to { transform: translateX(50%); } }
+.hp-partner { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; filter: grayscale(1); opacity: .75; transition: filter .25s, opacity .25s; }
+.hp-partner:hover { filter: none; opacity: 1; }
+.hp-partner img { height: 42px; width: auto; max-width: 120px; object-fit: contain; }
+.hp-partner i { width: 42px; height: 42px; border-radius: 12px; background: #E4E9F2; color: #1F3A68; font-style: normal; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.hp-partner b { font-size: 15px; color: #1A2233; }
+
+/* ---------- hero life ---------- */
+.hp-hero { position: relative; overflow: hidden; }
+.hp-hero::before { content: ''; position: absolute; inset: -40%; background: radial-gradient(closest-side, rgba(31,58,104,.10), transparent 70%) 20% 30% / 50% 50% no-repeat, radial-gradient(closest-side, rgba(184,194,208,.35), transparent 70%) 80% 70% / 45% 45% no-repeat; animation: hp-drift 18s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes hp-drift { from { transform: translate(0, 0) rotate(0deg); } to { transform: translate(4%, -3%) rotate(6deg); } }
+.hp-hero > * { position: relative; }
+.hp-hero-deco { position: absolute !important; inset-inline-start: -30px; bottom: -40px; opacity: .07; transform-origin: bottom center; animation: hp-sway 6s ease-in-out infinite alternate; pointer-events: none; }
+.hp-hero-deco svg path { stroke: #1F3A68; } .hp-hero-deco svg ellipse { fill: #1F3A68; }
+@keyframes hp-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+.hp-tile { transition: transform .25s ease, box-shadow .25s ease; }
+.hp-tile:hover { transform: translateY(-4px); box-shadow: 0 14px 28px -18px rgba(15,27,51,.5); }
+.hp-tile:hover .hp-ico { background: #1F3A68; }
+.hp-tile:hover .hp-ico svg * { stroke: #fff; }
+.hp-ico { transition: background .25s; }
+.hp-feature, .hp-country, .hp-orphan, .hp-stat, .hp-plan-year { transition: transform .25s ease, box-shadow .25s ease; }
+.hp-feature:hover, .hp-country:hover, .hp-orphan:hover, .hp-stat:hover, .hp-plan-year:hover { transform: translateY(-4px); box-shadow: 0 14px 28px -20px rgba(15,27,51,.45); }
+.hp-project { transition: transform .25s ease, box-shadow .25s ease; }
+.hp-project:hover { transform: translateY(-5px); }
+.hp-project img { transition: transform .5s ease; }
+.hp-project:hover img { transform: scale(1.05); }
+.hb { transition: background .2s, transform .2s, box-shadow .2s; }
+.hb:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -12px rgba(31,58,104,.7); }
+.hp-band-list div { transition: background .25s, transform .25s; }
+.hp-band-list div:hover { background: rgba(243,244,246,.12); transform: translateX(-6px); }
+.hp-pres img { transition: transform .5s ease; }
+.hp-pres:hover img { transform: scale(1.02); }
+
+/* ---------- scroll reveal (only when JS is on) ---------- */
+.hp-js [data-reveal] { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.hp-js [data-reveal].in { opacity: 1; transform: none; }
+.hp-js .hp-stagger[data-reveal] { opacity: 1; transform: none; }
+.hp-js .hp-stagger[data-reveal] > * { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.7,.2,1); }
+.hp-js .hp-stagger[data-reveal].in > * { opacity: 1; transform: none; }
+.hp-js .hp-stagger.in > *:nth-child(2) { transition-delay: .08s; } .hp-js .hp-stagger.in > *:nth-child(3) { transition-delay: .16s; }
+.hp-js .hp-stagger.in > *:nth-child(4) { transition-delay: .24s; } .hp-js .hp-stagger.in > *:nth-child(5) { transition-delay: .32s; }
+.hp-js .hp-stagger.in > *:nth-child(6) { transition-delay: .40s; } .hp-js .hp-stagger.in > *:nth-child(n+7) { transition-delay: .48s; }
+.hp-arc { animation: hp-arc 1.6s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes hp-arc { from { stroke-dasharray: 0 var(--c); } to { stroke-dasharray: var(--arc) var(--c); } }
+.hp-track > div { animation: hp-grow 1.4s cubic-bezier(.2,.7,.2,1) both; transform-origin: right; }
+@keyframes hp-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (max-width: 760px) {
+  .hp-partners-in { height: 64px; gap: 12px; }
+  .hp-partners-label { font-size: 12px; padding-inline-end: 12px; }
+  .hp-partner img, .hp-partner i { height: 34px; } .hp-partner i { width: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hp *, .hp *::before { animation: none !important; transition: none !important; }
+  .hp-js [data-reveal], .hp-js .hp-stagger[data-reveal] > * { opacity: 1 !important; transform: none !important; }
+}

@@ -4,6 +4,7 @@ import { Logo } from '@/components/Logo';
 import { getHomeData, arCount, PROJECTS_W, COUNTRIES_W, TABS } from '@/lib/home';
 import { FLAGS, ICONS } from '@/lib/home-assets';
 import { fmt } from '@/lib/format';
+import { HomeMotion } from '@/components/HomeMotion';
 import './home.css';
 
 export const dynamic = 'force-dynamic';
@@ -27,6 +28,7 @@ function Donut({ pct, size = 180 }: { pct: number; size?: number }) {
       <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true">
         <circle cx="50" cy="50" r={r} fill="none" stroke="#E4E9F2" strokeWidth="10" />
         {pct > 0 && <circle cx="50" cy="50" r={r} fill="none" stroke="#1F3A68" strokeWidth="10" strokeLinecap="round"
+          className="hp-arc" style={{ ['--arc' as string]: `${(pct / 100) * c}`, ['--c' as string]: `${c}` }}
           strokeDasharray={`${(pct / 100) * c} ${c}`} transform="rotate(-90 50 50)" />}
       </svg>
       <span style={{ fontSize: size / 5 }}>{pct}%<small style={{ fontSize: Math.max(11, size / 14) }}>{size > 120 ? 'نسبة التحصيل' : ''}</small></span>
@@ -61,10 +63,33 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
         </div>
       </header>
 
+      {d.associations.length > 0 && (
+        <div className="hp-partners" aria-label="الجمعيات الشريكة">
+          <div className="hx hp-partners-in">
+            <span className="hp-partners-label">شركاؤنا في الخير</span>
+            <div className="hp-marquee">
+              <div className="hp-marquee-track" style={{ animationDuration: `${Math.max(20, d.associations.length * 6)}s` }}>
+                {[0, 1].map((k) =>
+                  Array.from({ length: Math.max(1, Math.ceil(8 / d.associations.length)) }).flatMap((_, rep) =>
+                    d.associations.map((a) => (
+                      <span className="hp-partner" key={`${k}-${rep}-${a.id}`} aria-hidden={k === 1 || rep > 0 ? true : undefined}>
+                        {a.logoUrl ? <img src={a.logoUrl} alt={a.name} /> : <i>{a.name.charAt(0)}</i>}
+                        <b>{a.name}</b>
+                      </span>
+                    )),
+                  ),
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main id="top">
         {/* HERO */}
         <section className="hx">
-          <div className="hp-hero">
+          <div className="hp-hero" data-reveal>
+            <span className="hp-hero-deco" aria-hidden="true"><Logo size={220} /></span>
             <div className="hp-hero-text">
               <span className="hp-pill">{short}</span>
               <h1><Lines text={d.text('heroTitle')} /></h1>
@@ -74,7 +99,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
                 <a className="hb hb-white" href="#projects">استعرض المشاريع</a>
               </div>
             </div>
-            <div className="hp-tiles">
+            <div className="hp-tiles hp-stagger" data-reveal>
               {d.sectorCounts.map((t) => (
                 <div className="hp-tile" key={t.name}>
                   <Svg className="hp-ico" html={ICONS[t.icon]} />
@@ -94,7 +119,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
         {/* PLAN */}
         {d.plan && (
           <section id="plan" className="hx hp-sec">
-            <div className="hp-card hp-plan">
+            <div className="hp-card hp-plan" data-reveal>
               <div className="hp-plan-main">
                 <Donut pct={d.plan.pct} />
                 <div>
@@ -102,12 +127,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
                   <h2>{d.plan.rows.length === 1 ? 'خطة سنة واحدة' : d.plan.rows.length === 2 ? 'خطة لسنتين' : `خطة لـ ${d.plan.rows.length} سنوات`}</h2>
                   <div className="hp-plan-figs">
                     <div><small>المستهدف للخطة كاملة</small><b>{fmt(d.plan.target)} ر.ق</b></div>
-                    <div><small>المحصّل</small><b className="navy">{fmt(d.plan.collected)} ر.ق</b></div>
+                    <div><small>المحصّل</small><b className="navy" data-count={`${fmt(d.plan.collected)} ر.ق`}>{fmt(d.plan.collected)} ر.ق</b></div>
                     <div><small>المتبقي</small><b>{fmt(Math.max(0, d.plan.target - d.plan.collected))} ر.ق</b></div>
                   </div>
                 </div>
               </div>
-              <div className="hp-plan-years">
+              <div className="hp-plan-years hp-stagger" data-reveal>
                 {d.plan.rows.map((r) => (
                   <div className="hp-plan-year" key={r.year}>
                     <Donut pct={r.pct} size={92} />
@@ -125,7 +150,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* PRESIDENT */}
         <section id="president" className="hx hp-sec">
-          <div className="hp-card hp-pres">
+          <div className="hp-card hp-pres" data-reveal>
             <figure>
               <img src={d.presPhoto} alt={d.text('presName')} />
               <figcaption><b>{d.text('presName')}</b><small>{d.text('presTitle')}</small></figcaption>
@@ -140,7 +165,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* IMPACT */}
         <section className="hx hp-sec">
-          <div className="hp-impact">
+          <div className="hp-impact" data-reveal>
             <div className="hp-impact-top">
               <div><small>المبلغ المستهدف لعام {d.year}</small><b>{s.target ? `${fmt(s.target)} ر.ق` : '—'}</b></div>
               <div><small>إجمالي قيمة المشاريع المنفذة</small><b className="silver">{fmt(s.totalValue)} ر.ق</b></div>
@@ -162,11 +187,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* ABOUT */}
         <section id="about" className="hx hp-sec">
-          <div className="hp-split">
+          <div className="hp-split" data-reveal>
             <div><span className="hp-eyebrow">عن السنبلة</span><h2><Lines text={d.text('aboutTitle')} /></h2></div>
             <div><Paras text={d.text('aboutText')} className="hp-lead" /></div>
           </div>
-          <div className="hp-grid3">
+          <div className="hp-grid3 hp-stagger" data-reveal>
             {[
               ['seed', 'البذرة: نختار المشروع', 'ندرس الاحتياج الفعلي، ونختار المشروع الأنفع والجهة المنفذة الأكفأ.'],
               ['grow', 'النماء: نتابع التنفيذ', 'متابعة ميدانية وتقارير دورية بالصور والأرقام في كل مرحلة.'],
@@ -179,20 +204,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* ACHIEVEMENTS */}
         <section id="achievements" className="hx hp-sec">
-          <div className="hp-split">
+          <div className="hp-split" data-reveal>
             <div><span className="hp-eyebrow">إنجازاتنا</span><h2>في {arCount(s.countries, COUNTRIES_W)} حول العالم</h2></div>
             {d.achievementsText && <p className="hp-lead">{d.achievementsText}</p>}
           </div>
-          <div className="hp-stats">
-            <div className="hp-stat dark"><b>{fmt(s.totalValue)}</b><small>إجمالي قيمة البرامج المنفذة (ر.ق)</small></div>
-            <div className="hp-stat"><b>+{fmt(s.beneficiaries)}</b><small>مستفيد</small></div>
-            <div className="hp-stat"><b>{fmt(s.countries)}</b><small>دول</small></div>
-            <div className="hp-stat"><b>{fmt(s.done)}</b><small>مشروع منجز</small></div>
+          <div className="hp-stats hp-stagger" data-reveal>
+            <div className="hp-stat dark"><b data-count={fmt(s.totalValue)}>{fmt(s.totalValue)}</b><small>إجمالي قيمة البرامج المنفذة (ر.ق)</small></div>
+            <div className="hp-stat"><b data-count={`+${fmt(s.beneficiaries)}`}>+{fmt(s.beneficiaries)}</b><small>مستفيد</small></div>
+            <div className="hp-stat"><b data-count={fmt(s.countries)}>{fmt(s.countries)}</b><small>دول</small></div>
+            <div className="hp-stat"><b data-count={fmt(s.done)}>{fmt(s.done)}</b><small>مشروع منجز</small></div>
           </div>
           {d.countries.length > 0 && (
             <>
               <h3 className="hp-sub">الدول التي وصلنا إليها</h3>
-              <div className="hp-countries">
+              <div className="hp-countries hp-stagger" data-reveal>
                 {d.countries.map((c) => (
                   <div className="hp-card hp-country" key={c.name}>
                     {FLAGS[c.name] && <Svg className="hp-flag" html={FLAGS[c.name]} />}
@@ -206,7 +231,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* ORPHANS */}
         <section id="orphans" className="hx hp-sec">
-          <div className="hp-head">
+          <div className="hp-head" data-reveal>
             <div>
               <span className="hp-eyebrow">كفالة الأيتام</span>
               <h2>{fmt(s.orphans)} يتيماً في كفالتنا</h2>
@@ -218,14 +243,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
             </div>
           </div>
           {d.orphanRows.length > 0 && (
-            <div className="hp-auto">
+            <div className="hp-auto hp-stagger" data-reveal>
               {d.orphanRows.map((o) => (
                 <div className="hp-card hp-orphan" key={o.name}>
                   <div className="hp-spread">
                     <span className="hp-row tight">{FLAGS[o.name] && <Svg className="hp-flag sm" html={FLAGS[o.name]} />}<b>{o.name}</b></span>
                     <small className="hp-muted">{o.share}%</small>
                   </div>
-                  <div><span className="hp-num">{fmt(o.n)}</span> <small className="hp-muted">يتيماً مكفولاً</small></div>
+                  <div><span className="hp-num" data-count={fmt(o.n)}>{fmt(o.n)}</span> <small className="hp-muted">يتيماً مكفولاً</small></div>
                   <div className="hp-track"><div style={{ width: `${o.share}%` }} /></div>
                 </div>
               ))}
@@ -235,8 +260,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* HOW */}
         <section id="how" className="hx hp-sec">
-          <div className="hp-center"><span className="hp-eyebrow">كيف نعمل</span><h2>ثلاث خطوات من التبرع إلى الأثر</h2></div>
-          <div className="hp-grid3">
+          <div className="hp-center" data-reveal><span className="hp-eyebrow">كيف نعمل</span><h2>ثلاث خطوات من التبرع إلى الأثر</h2></div>
+          <div className="hp-grid3 hp-stagger" data-reveal>
             {[
               ['سجّل التبرع', 'أدخل الجمعية، المشروع، والمبلغ، وحدّد إن كان دفعة واحدة أو على دفعات.'],
               ['تابع الدفعات', 'جدول واضح لما دُفع وما هو مستحق، مع تنبيه قبل موعد كل دفعة.'],
@@ -249,7 +274,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* PROJECTS */}
         <section id="projects" className="hx hp-sec">
-          <div className="hp-head">
+          <div className="hp-head" data-reveal>
             <div><span className="hp-eyebrow">المشاريع</span><h2>مشاريع تتابع أثرها</h2></div>
             <div className="hp-tabs">
               {TABS.map((t) => <a key={t.key} href={`/?tab=${t.key}#projects`} className={d.tab === t.key ? 'on' : ''}>{t.label}</a>)}
@@ -258,7 +283,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
           {d.cards.length === 0 ? (
             <div className="hp-empty"><b>لا توجد مشاريع لعرضها بعد</b><span>تظهر المشاريع هنا تلقائياً عند إضافتها في النظام.</span></div>
           ) : (
-            <div className="hp-auto wide">
+            <div className="hp-auto wide hp-stagger" data-reveal>
               {d.cards.map((p) => (
                 <Link href={`/p/${p.id}`} className="hp-card hp-project" key={p.id}>
                   {p.img ? <img src={p.img} alt="" /> : <div className="hp-ph">{p.sector}</div>}
@@ -278,7 +303,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
 
         {/* REPORTS */}
         <section id="reports" className="hx hp-sec">
-          <div className="hp-band">
+          <div className="hp-band" data-reveal>
             <div>
               <h2>تقارير واضحة<br />لكل ريال تبرعت به</h2>
               <p>اعرف أين ذهب تبرعك، ومتى، وما الذي تحقق.</p>
@@ -305,6 +330,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ t
           <div className="hp-foot-bottom"><span>© {d.year} {d.orgName}. جميع الحقوق محفوظة.</span></div>
         </div>
       </footer>
+      <HomeMotion />
     </div>
   );
 }

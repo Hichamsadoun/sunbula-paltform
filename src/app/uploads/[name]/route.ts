@@ -9,11 +9,12 @@ const TYPES: Record<string, string> = {
 
 /** Images of the public site and of published reports are public; everything else needs a signed-in user. */
 async function isPublic(url: string) {
-  const [setting, image] = await Promise.all([
+  const [setting, image, logo] = await Promise.all([
     db.setting.findFirst({ where: { key: { startsWith: 'home:' }, value: url } }),
     db.reportImage.findFirst({ where: { url, report: { published: true } } }),
+    db.association.findFirst({ where: { logoUrl: url }, select: { id: true } }),
   ]);
-  return !!(setting || image);
+  return !!(setting || image || logo);
 }
 
 export async function GET(_req: Request, { params }: { params: Promise<{ name: string }> }) {
